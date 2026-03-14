@@ -30,17 +30,6 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-      - name: Update Quartz
-        run: |
-          git config pull.rebase >&- || git config pull.rebase false
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git config remote.template.url >&- || git remote add template https://github.com/quartz-themes/quartz-themes-preview-template.git
-          git fetch template v5
-          git pull template v5 -X theirs --no-edit
-          git pull origin v4 -X theirs --no-edit
-          git push || git push --force
-
       # - name: Cache dependencies
       #   uses: actions/cache@v5
       #   with:
@@ -68,6 +57,10 @@ jobs:
           max_attempts: 3
           on_retry_command: |
             npm install
+            cp quartz.lock.json quartz.lock.json.bak
+            npx quartz upgrade &>/dev/null || true
+            rm quartz.lock.json
+            mv quartz.lock.json.bak quartz.lock.json
             npx quartz plugin restore
             npx quartz plugin update
 
